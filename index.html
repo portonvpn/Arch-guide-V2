@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Arch guide v2 cuz old too cumplicated</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f13;color:#f1f5f9;font-size:16px;padding:16px;max-width:600px;margin:0 auto}
+h1{font-size:20px;font-weight:600;margin:16px 0 4px}
+.sub{font-size:13px;color:#6272a4;margin-bottom:24px}
+.sec-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:#6272a4;margin:28px 0 12px;padding-bottom:8px;border-bottom:1px solid #1e1e2e}
+.step{margin-bottom:20px}
+.num{font-size:11px;font-weight:600;color:#7f77dd;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.title{font-size:17px;font-weight:600;margin-bottom:6px;color:#f1f5f9}
+.note{font-size:14px;color:#94a3b8;line-height:1.6;margin-bottom:8px}
+.cmd{background:#1a1a2e;border-radius:10px;padding:14px 16px;margin:8px 0;overflow-x:auto;border:1px solid #2a2a3e}
+.cmd pre{font-family:'SF Mono',Menlo,Monaco,Consolas,monospace;font-size:14px;color:#e2e8f0;line-height:2;white-space:pre}
+.c{color:#6272a4;font-size:13px}
+.g{color:#86efac}
+.warn{background:#2a1f00;border-left:3px solid #EF9F27;border-radius:0 8px 8px 0;padding:10px 14px;font-size:14px;line-height:1.6;margin:8px 0;color:#fde68a}
+.info{background:#001a2e;border-left:3px solid #378ADD;border-radius:0 8px 8px 0;padding:10px 14px;font-size:14px;line-height:1.6;margin:8px 0;color:#bae6fd}
+.danger{background:#2a0000;border-left:3px solid #E24B4A;border-radius:0 8px 8px 0;padding:10px 14px;font-size:14px;line-height:1.6;margin:8px 0;color:#fca5a5}
+.il{font-family:'SF Mono',Menlo,Monaco,Consolas,monospace;font-size:13px;background:#1e1e2e;padding:1px 6px;border-radius:4px;border:1px solid #2a2a3e;color:#c4b5fd}
+b{font-weight:600;color:#f1f5f9}
+</style>
+</head>
+<body>
+
+<h1>Arch guide v2 cuz old too cumplicated</h1>
+<div class="sub">for hp mfs and goonersss</div>
+
+<!-- BEFORE -->
+<div class="sec-title">Before booting</div>
+
+<div class="step">
+<div class="num">Step 1</div>
+<div class="title">Disable Secure Boot</div>
+<div class="note">Spam <span class="il">F10</span> on startup → Security → Secure Boot → <b>Disabled</b> → <span class="il">F10</span> save. Plug in USB, spam <span class="il">F9</span> → pick USB → pick Arch ISO.</div>
+<div class="info">You're in when you see <span class="il">root@archiso ~ #</span></div>
+</div>
+
+<!-- LIVE USB -->
+<div class="sec-title">Live USB</div>
+
+<div class="step">
+<div class="num">Step 2</div>
+<div class="title">Connect WiFi</div>
+<div class="cmd"><pre>iwctl
+station wlan0 scan
+station wlan0 get-networks
+station wlan0 connect "<span class="g">YourWiFiName</span>"
+exit
+ping -c 3 archlinux.org</pre></div>
+<div class="info">Password cursor won't move — normal. Ctrl+C to stop ping.</div>
+</div>
+
+<div class="step">
+<div class="num">Step 3</div>
+<div class="title">Find your disk</div>
+<div class="cmd"><pre>lsblk</pre></div>
+<div class="info">Find your drive by size — probably <span class="il">sda</span>. The USB shows up too, ignore it. Guide uses <span class="il">/dev/sda</span> everywhere.</div>
+</div>
+
+<div class="step">
+<div class="num">Step 4</div>
+<div class="title">Partition</div>
+<div class="danger">Wipes the drive. No going back.</div>
+<div class="cmd"><pre>cfdisk /dev/sda</pre></div>
+<div class="info">
+Arrow keys to move, Enter to select:<br><br>
+1. Select <b>gpt</b> if asked<br>
+2. New → <span class="il">512M</span> (boot partition)<br>
+3. Free space → New → <span class="il">4G</span> (swap)<br>
+4. Free space → New → Enter (rest, main)<br>
+5. Go to 512M → Type → <b>EFI System</b><br>
+6. Go to 4G → Type → <b>Linux swap</b><br>
+7. <b>Write</b> → type <span class="il">yes</span> → <b>Quit</b>
+</div>
+</div>
+
+<div class="step">
+<div class="num">Step 5</div>
+<div class="title">Format</div>
+<div class="cmd"><pre>mkfs.fat -F32 /dev/sda1
+mkswap /dev/sda2
+mkfs.ext4 /dev/sda3</pre></div>
+</div>
+
+<div class="step">
+<div class="num">Step 6</div>
+<div class="title">Mount</div>
+<div class="cmd"><pre>mount /dev/sda3 /mnt
+mount --mkdir /dev/sda1 /mnt/boot
+swapon /dev/sda2</pre></div>
+</div>
+
+<!-- INSTALL -->
+<div class="sec-title">Install</div>
+
+<div class="step">
+<div class="num">Step 7</div>
+<div class="title">Pacstrap — main install</div>
+<div class="cmd"><pre>pacstrap -K /mnt base linux \
+  linux-firmware intel-ucode \
+  networkmanager sudo nano \
+  git base-devel grub \
+  efibootmgr mesa \
+  vulkan-intel \
+  intel-media-driver \
+  pipewire pipewire-alsa \
+  pipewire-pulse wireplumber \
+  xdg-user-dirs</pre></div>
+<div class="warn">Takes 5-15 min depending on WiFi. Don't close terminal.</div>
+</div>
+
+<div class="step">
+<div class="num">Step 8</div>
+<div class="title">fstab + chroot</div>
+<div class="cmd"><pre>genfstab -U /mnt >> /mnt/etc/fstab
+arch-chroot /mnt</pre></div>
+<div class="info">Prompt changes after chroot — you're now inside your new system.</div>
+</div>
+
+<!-- CONFIGURE -->
+<div class="sec-title">Configure (inside chroot)</div>
+
+<div class="step">
+<div class="num">Step 9</div>
+<div class="title">Timezone</div>
+<div class="cmd"><pre>ln -sf /usr/share/zoneinfo/Asia/Kolkata \
+  /etc/localtime
+hwclock --systohc</pre></div>
+</div>
+
+<div class="step">
+<div class="num">Step 10</div>
+<div class="title">Language</div>
+<div class="cmd"><pre>nano /etc/locale.gen</pre></div>
+<div class="info">Ctrl+W → search <span class="il">en_US.UTF-8</span> → find <span class="il">#en_US.UTF-8 UTF-8</span> → delete the # → Ctrl+X → Y → Enter</div>
+<div class="cmd"><pre>locale-gen
+echo "LANG=en_US.UTF-8" > /etc/locale.conf</pre></div>
+</div>
+
+<div class="step">
+<div class="num">Step 11</div>
+<div class="title">Hostname</div>
+<div class="cmd"><pre>echo "<span class="g">myarch</span>" > /etc/hostname</pre></div>
+<div class="note">Replace <span class="il">myarch</span> with any name, no spaces.</div>
+</div>
+
+<div class="step">
+<div class="num">Step 12</div>
+<div class="title">Bootloader</div>
+<div class="cmd"><pre>grub-install \
+  --target=x86_64-efi \
+  --efi-directory=/boot \
+  --bootloader-id=GRUB
+grub-mkconfig -o /boot/grub/grub.cfg</pre></div>
+<div class="info">Should say "Found linux image" — good.</div>
+</div>
+
+<div class="step">
+<div class="num">Step 13</div>
+<div class="title">Root password + your user</div>
+<div class="cmd"><pre>passwd
+useradd -mG wheel <span class="g">yourname</span>
+passwd <span class="g">yourname</span>
+EDITOR=nano visudo</pre></div>
+<div class="info">In visudo: Ctrl+W → search <span class="il">%wheel ALL</span> → find <span class="il"># %wheel ALL=(ALL:ALL) ALL</span> → delete the # → Ctrl+X → Y → Enter</div>
+</div>
+
+<div class="step">
+<div class="num">Step 14</div>
+<div class="title">Enable network + reboot</div>
+<div class="cmd"><pre>systemctl enable NetworkManager
+exit
+umount -R /mnt
+reboot</pre></div>
+<div class="warn">Pull the USB out when screen goes dark!</div>
+</div>
+
+<!-- FIRST BOOT -->
+<div class="sec-title">First boot — install COSMIC</div>
+
+<div class="step">
+<div class="num">Step 15</div>
+<div class="title">Connect WiFi</div>
+<div class="cmd"><pre>nmtui</pre></div>
+<div class="note">Activate a connection → pick WiFi → enter password → OK → Esc</div>
+</div>
+
+<div class="step">
+<div class="num">Step 16</div>
+<div class="title">Install paru (AUR helper)</div>
+<div class="info">Make sure you're logged in as your normal user, not root. If you're root: <span class="il">su yourname</span></div>
+<div class="cmd"><pre>cd /tmp
+git clone \
+  https://aur.archlinux.org/paru.git
+cd paru
+makepkg -si</pre></div>
+<div class="note">Press Enter when asked "Proceed with installation?"</div>
+</div>
+
+<div class="step">
+<div class="num">Step 17</div>
+<div class="title">Install COSMIC</div>
+<div class="cmd"><pre>paru -S cosmic-epoch</pre></div>
+<div class="warn">Compiles tons of Rust code. 30-60 min on your i3. Not frozen — just building. Leave it.</div>
+</div>
+
+<div class="step">
+<div class="num">Step 18</div>
+<div class="title">Enable login screen + done</div>
+<div class="cmd"><pre>sudo systemctl enable greetd
+sudo reboot</pre></div>
+<div class="info">You'll boot into COSMIC's login screen. Log in and you're done.</div>
+</div>
+
+<!-- AFTER -->
+<div class="sec-title">After install</div>
+
+<div class="cmd"><pre><span class="c"># Update everything</span>
+sudo pacman -Syu
+
+<span class="c"># Install Firefox</span>
+paru -S firefox
+
+<span class="c"># Set up home folders</span>
+xdg-user-dirs-update</pre></div>
+
+<div style="height:32px"></div>
+</body>
+</html>
