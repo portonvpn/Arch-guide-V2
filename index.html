@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Arch guide v2 cuz old too cumplicated</title>
+<title>Arch guide v3 — now with actual good DE</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f0f13;color:#f1f5f9;font-size:16px;padding:16px;max-width:600px;margin:0 auto}
@@ -27,8 +27,8 @@ b{font-weight:600;color:#f1f5f9}
 </head>
 <body>
 
-<h1>Arch guide v2 cuz old too cumplicated</h1>
-<div class="sub">for hp mfs and goonersss</div>
+<h1>Arch guide v3 — now with actual good DE</h1>
+<div class="sub">for hp mfs and goonersss · ml4w hyprland edition</div>
 
 <!-- BEFORE -->
 <div class="sec-title">Before booting</div>
@@ -64,15 +64,22 @@ ping -c 3 archlinux.org</pre></div>
 
 <div class="step">
 <div class="num">Step 4</div>
+<div class="title">Wipe everything first</div>
+<div class="danger">This deletes everything on the disk. No going back.</div>
+<div class="cmd"><pre>wipefs -af /dev/sda
+sgdisk -Z /dev/sda</pre></div>
+</div>
+
+<div class="step">
+<div class="num">Step 5</div>
 <div class="title">Partition</div>
-<div class="danger">Wipes the drive. No going back.</div>
 <div class="cmd"><pre>cfdisk /dev/sda</pre></div>
 <div class="info">
 Arrow keys to move, Enter to select:<br><br>
 1. Select <b>gpt</b> if asked<br>
-2. New → <span class="il">512M</span> (boot partition)<br>
+2. New → <span class="il">512M</span> (boot)<br>
 3. Free space → New → <span class="il">4G</span> (swap)<br>
-4. Free space → New → Enter (rest, main)<br>
+4. Free space → New → Enter (rest, your actual system)<br>
 5. Go to 512M → Type → <b>EFI System</b><br>
 6. Go to 4G → Type → <b>Linux swap</b><br>
 7. <b>Write</b> → type <span class="il">yes</span> → <b>Quit</b>
@@ -80,7 +87,7 @@ Arrow keys to move, Enter to select:<br><br>
 </div>
 
 <div class="step">
-<div class="num">Step 5</div>
+<div class="num">Step 6</div>
 <div class="title">Format</div>
 <div class="cmd"><pre>mkfs.fat -F32 /dev/sda1
 mkswap /dev/sda2
@@ -88,7 +95,7 @@ mkfs.ext4 /dev/sda3</pre></div>
 </div>
 
 <div class="step">
-<div class="num">Step 6</div>
+<div class="num">Step 7</div>
 <div class="title">Mount</div>
 <div class="cmd"><pre>mount /dev/sda3 /mnt
 mount --mkdir /dev/sda1 /mnt/boot
@@ -99,7 +106,7 @@ swapon /dev/sda2</pre></div>
 <div class="sec-title">Install</div>
 
 <div class="step">
-<div class="num">Step 7</div>
+<div class="num">Step 8</div>
 <div class="title">Pacstrap — main install</div>
 <div class="cmd"><pre>pacstrap -K /mnt base linux \
   linux-firmware intel-ucode \
@@ -111,11 +118,11 @@ swapon /dev/sda2</pre></div>
   pipewire pipewire-alsa \
   pipewire-pulse wireplumber \
   xdg-user-dirs</pre></div>
-<div class="warn">Takes 5-15 min depending on WiFi. Don't close terminal.</div>
+<div class="warn">Takes 5–15 min depending on WiFi. Don't close terminal.</div>
 </div>
 
 <div class="step">
-<div class="num">Step 8</div>
+<div class="num">Step 9</div>
 <div class="title">fstab + chroot</div>
 <div class="cmd"><pre>genfstab -U /mnt >> /mnt/etc/fstab
 arch-chroot /mnt</pre></div>
@@ -126,7 +133,7 @@ arch-chroot /mnt</pre></div>
 <div class="sec-title">Configure (inside chroot)</div>
 
 <div class="step">
-<div class="num">Step 9</div>
+<div class="num">Step 10</div>
 <div class="title">Timezone</div>
 <div class="cmd"><pre>ln -sf /usr/share/zoneinfo/Asia/Kolkata \
   /etc/localtime
@@ -134,7 +141,7 @@ hwclock --systohc</pre></div>
 </div>
 
 <div class="step">
-<div class="num">Step 10</div>
+<div class="num">Step 11</div>
 <div class="title">Language</div>
 <div class="cmd"><pre>nano /etc/locale.gen</pre></div>
 <div class="info">Ctrl+W → search <span class="il">en_US.UTF-8</span> → find <span class="il">#en_US.UTF-8 UTF-8</span> → delete the # → Ctrl+X → Y → Enter</div>
@@ -143,14 +150,14 @@ echo "LANG=en_US.UTF-8" > /etc/locale.conf</pre></div>
 </div>
 
 <div class="step">
-<div class="num">Step 11</div>
+<div class="num">Step 12</div>
 <div class="title">Hostname</div>
 <div class="cmd"><pre>echo "<span class="g">myarch</span>" > /etc/hostname</pre></div>
 <div class="note">Replace <span class="il">myarch</span> with any name, no spaces.</div>
 </div>
 
 <div class="step">
-<div class="num">Step 12</div>
+<div class="num">Step 13</div>
 <div class="title">Bootloader</div>
 <div class="cmd"><pre>grub-install \
   --target=x86_64-efi \
@@ -161,7 +168,7 @@ grub-mkconfig -o /boot/grub/grub.cfg</pre></div>
 </div>
 
 <div class="step">
-<div class="num">Step 13</div>
+<div class="num">Step 14</div>
 <div class="title">Root password + your user</div>
 <div class="cmd"><pre>passwd
 useradd -mG wheel <span class="g">yourname</span>
@@ -171,7 +178,7 @@ EDITOR=nano visudo</pre></div>
 </div>
 
 <div class="step">
-<div class="num">Step 14</div>
+<div class="num">Step 15</div>
 <div class="title">Enable network + reboot</div>
 <div class="cmd"><pre>systemctl enable NetworkManager
 exit
@@ -181,53 +188,62 @@ reboot</pre></div>
 </div>
 
 <!-- FIRST BOOT -->
-<div class="sec-title">First boot — install COSMIC</div>
+<div class="sec-title">First boot — install ML4W hyprland</div>
 
 <div class="step">
-<div class="num">Step 15</div>
+<div class="num">Step 16</div>
 <div class="title">Connect WiFi</div>
 <div class="cmd"><pre>nmtui</pre></div>
 <div class="note">Activate a connection → pick WiFi → enter password → OK → Esc</div>
 </div>
 
 <div class="step">
-<div class="num">Step 16</div>
+<div class="num">Step 17</div>
 <div class="title">Install paru (AUR helper)</div>
-<div class="info">Make sure you're logged in as your normal user, not root. If you're root: <span class="il">su yourname</span></div>
+<div class="info">Make sure you're logged in as your normal user, not root. If you see root@: <span class="il">su yourname</span> then <span class="il">cd ~</span></div>
 <div class="cmd"><pre>cd /tmp
-git clone \
-  https://aur.archlinux.org/paru.git
+git clone https://aur.archlinux.org/paru.git
 cd paru
 makepkg -si</pre></div>
 <div class="note">Press Enter when asked "Proceed with installation?"</div>
 </div>
 
 <div class="step">
-<div class="num">Step 17</div>
-<div class="title">Install COSMIC</div>
-<div class="cmd"><pre>paru -S cosmic-epoch</pre></div>
-<div class="warn">Compiles tons of Rust code. 30-60 min on your i3. Not frozen — just building. Leave it.</div>
+<div class="num">Step 18</div>
+<div class="title">Install ly (login manager)</div>
+<div class="note">Tiny, fast, looks like a retro terminal login. No bloat.</div>
+<div class="cmd"><pre>paru -S ly
+sudo systemctl enable ly</pre></div>
+<div class="info">That's the entire login manager install. Two commands.</div>
 </div>
 
 <div class="step">
-<div class="num">Step 18</div>
-<div class="title">Enable login screen + done</div>
-<div class="cmd"><pre>sudo systemctl enable greetd
-sudo reboot</pre></div>
-<div class="info">You'll boot into COSMIC's login screen. Log in and you're done.</div>
+<div class="num">Step 19</div>
+<div class="title">Install ML4W Hyprland</div>
+<div class="cmd"><pre>paru -S ml4w-hyprland</pre></div>
+<div class="warn">Will pull in hyprland + a lot of deps. Takes a while. Not frozen.</div>
+<div class="cmd"><pre>ml4w-hyprland-setup</pre></div>
+<div class="info">An interactive wizard starts — follow the prompts to pick your config. It handles everything: waybar, rofi, themes, the works.</div>
+</div>
+
+<div class="step">
+<div class="num">Step 20</div>
+<div class="title">Reboot into your setup</div>
+<div class="cmd"><pre>sudo reboot</pre></div>
+<div class="info">ly greets you on the terminal login screen. Log in → Hyprland loads. You're done.</div>
 </div>
 
 <!-- AFTER -->
 <div class="sec-title">After install</div>
 
 <div class="cmd"><pre><span class="c"># Update everything</span>
-sudo pacman -Syu
-
-<span class="c"># Install Firefox</span>
-paru -S firefox
+paru -Syu
 
 <span class="c"># Set up home folders</span>
-xdg-user-dirs-update</pre></div>
+xdg-user-dirs-update
+
+<span class="c"># If WiFi drops after reboot</span>
+nmtui</pre></div>
 
 <div style="height:32px"></div>
 </body>
